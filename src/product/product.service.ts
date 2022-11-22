@@ -7,7 +7,7 @@ import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductService {
-  private readonly logger = new Logger(ProductService.name);
+  private readonly logger = new Logger(this.constructor.name);
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
   ) {}
@@ -19,7 +19,7 @@ export class ProductService {
       );
       return await this.productRepository.save(createProductDto);
     } catch (e) {
-      console.error(
+      this.logger.error(
         `An error occurred while trying to save a product: ${e.message}`,
       );
       throw e;
@@ -32,25 +32,47 @@ export class ProductService {
     page = 0,
     limit = 10,
   ) {
-    const queryBuilder = this.productRepository
-      .createQueryBuilder('product')
-      .where('deleted_at IS NULL')
-      .offset(page)
-      .limit(limit)
-      .orderBy(orderBy, direction);
+    try {
+      const queryBuilder = this.productRepository
+        .createQueryBuilder('product')
+        .where('deleted_at IS NULL')
+        .offset(page)
+        .limit(limit)
+        .orderBy(orderBy, direction);
 
-    return await queryBuilder.getMany();
+      return await queryBuilder.getMany();
+    } catch (e) {
+      this.logger.error(`An error occurred on findAll: ${e.message}`);
+      throw e;
+    }
   }
 
   async findOne(id: number) {
-    return await this.productRepository.findOneBy({ id, deletedAt: IsNull() });
+    try {
+      return await this.productRepository.findOneBy({
+        id,
+        deletedAt: IsNull(),
+      });
+    } catch (e) {
+      this.logger.error(`An error occurred on findOne: ${e.message}`);
+      throw e;
+    }
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
-    return await this.productRepository.update(id, updateProductDto);
+    try {
+      this.logger.log(
+        `Updating product: ${id}|Name: ${updateProductDto.name}|Price: ${updateProductDto.price}|Stock: ${updateProductDto.price}`,
+      );
+      return await this.productRepository.update(id, updateProductDto);
+    } catch (e) {
+      this.logger.error(`An error occurred on update: ${e.message}`);
+      throw e;
+    }
   }
 
   async remove(id: number) {
+    this.logger.log(`Deleting product ${id}`);
     const product = await this.productRepository.findOneBy({ id });
     if (!product) throw new NotFoundException(`Product ${id} not found`);
 

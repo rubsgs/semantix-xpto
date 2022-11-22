@@ -14,12 +14,18 @@ import { PurchaseModule } from './purchase/purchase.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSource } from './data-source';
 import { Product } from './product/entities/product.entity';
+import { Purchase } from './purchase/entities/purchase.entity';
+import { Customer } from './customer/entities/customer.entity';
 
+const entities = [Product, Customer, Purchase];
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({ ...dataSource, entities: [Product] }),
-    TypeOrmModule.forFeature([Product]),
+    TypeOrmModule.forRoot({
+      ...dataSource,
+      entities,
+    }),
+    TypeOrmModule.forFeature(entities),
     CustomerModule,
     PurchaseModule,
     ProductModule,

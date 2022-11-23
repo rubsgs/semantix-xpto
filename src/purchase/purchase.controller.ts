@@ -29,6 +29,8 @@ export class PurchaseController {
     @Query('limit') limit?: number,
     @Query('customerId') customerId?: number,
     @Query('date') purchaseDate?: string,
+    @Query('month') purchaseMonth?: string,
+    @Query('year') purchaseYear?: number,
   ) {
     return this.purchaseService.findAll(
       sorting,
@@ -37,6 +39,8 @@ export class PurchaseController {
       limit,
       customerId,
       purchaseDate ? new Date(purchaseDate) : undefined,
+      purchaseMonth,
+      purchaseYear,
     );
   }
 

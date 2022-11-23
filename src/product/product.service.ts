@@ -36,7 +36,7 @@ export class ProductService {
       const queryBuilder = this.productRepository
         .createQueryBuilder('product')
         .where('deleted_at IS NULL')
-        .offset(page)
+        .offset(page * limit)
         .limit(limit)
         .orderBy(orderBy, direction);
 
@@ -78,5 +78,38 @@ export class ProductService {
 
     product.deletedAt = new Date();
     return await this.productRepository.update(id, product);
+  }
+
+  async bestSellers(
+    date?: Date,
+    month?: string,
+    year?: number,
+    direction: 'ASC' | 'DESC' = 'ASC',
+  ) {
+    let where = '';
+    if (year) {
+      where = `EXTRACT(YEAR FROM pu.purchase_date) = ${year}`;
+    }
+
+    if (month) {
+      where = `TO_DATE(purchase_date::text, 'YYYY-MM') = '${month}-01'`;
+    }
+
+    if (date) {
+      const dateString = date.toISOString().split('T')[0];
+      where = `TO_DATE(purchase_date::text, 'YYYY-MM-DD') = '${dateString}'`;
+    }
+
+    const queryBuilder = this.productRepository
+      .createQueryBuilder('p')
+      .select('p.*')
+      .addSelect('SUM(quantity) AS soldUnits')
+      .innerJoin('purchase_items', 'pi', 'p.id = pi.product_id')
+      .innerJoin('purchases', 'pu', 'pi.purchase_id = pu.id')
+      .where(where)
+      .groupBy('p.id')
+      .orderBy('soldUnits', direction);
+
+    return await queryBuilder.getRawMany();
   }
 }

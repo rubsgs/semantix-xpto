@@ -32,6 +32,22 @@ export class ProductController {
     return await this.productService.findAll(sorting, direction, page, limit);
   }
 
+  @Get('/best-sellers')
+  async getBestSellers(
+    @Query('date') date: string,
+    @Query('month') month: string,
+    @Query('year') year: number,
+    @Query('direction') direction: 'ASC' | 'DESC',
+  ) {
+    const dateObj = date ? new Date(date) : undefined;
+    return await this.productService.bestSellers(
+      dateObj,
+      month,
+      year,
+      direction,
+    );
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const product = await this.productService.findOne(+id);

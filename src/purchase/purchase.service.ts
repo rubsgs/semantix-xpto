@@ -14,6 +14,8 @@ import {
   FindOptionsWhere,
   In,
   IsNull,
+  Like,
+  Raw,
   Repository,
 } from 'typeorm';
 import { CreatePurchaseDto, PurchaseItemDto } from './dto/create-purchase.dto';
@@ -66,12 +68,28 @@ export class PurchaseService {
     limit = 10,
     customerId?: number,
     purchaseDate?: Date,
+    purchaseMonth?: string,
+    purchaseYear?: number,
   ) {
     const where: FindOptionsWhere<Purchase> = { deletedAt: IsNull() };
     const order: FindOptionsOrder<Purchase> = {};
 
     if (orderBy) order[orderBy] = { direction };
     if (customerId) where['customer'] = { id: customerId };
+
+    if (purchaseYear) {
+      const startDate = new Date(purchaseYear, 0, 1);
+      const endDate = new Date(purchaseYear, 11, 31, 23, 59, 59);
+      where['purchaseDate'] = Between(startDate, endDate);
+    }
+
+    if (purchaseMonth) {
+      const [year, month] = purchaseMonth.split('-');
+      const startDate = new Date(+year, +month - 1, 1);
+      const endDate = new Date(+year, +month, 0);
+      where['purchaseDate'] = Between(startDate, endDate);
+    }
+
     if (purchaseDate) {
       const date = new Date(purchaseDate);
       date.setUTCHours(23, 59, 59, 999);

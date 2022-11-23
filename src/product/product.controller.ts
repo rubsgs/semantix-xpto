@@ -34,10 +34,10 @@ export class ProductController {
 
   @Get('/best-sellers')
   async getBestSellers(
-    @Query('date') date: string,
-    @Query('month') month: string,
-    @Query('year') year: number,
-    @Query('direction') direction: 'ASC' | 'DESC',
+    @Query('date') date?: string,
+    @Query('month') month?: string,
+    @Query('year') year?: number,
+    @Query('direction') direction?: 'ASC' | 'DESC',
   ) {
     const dateObj = date ? new Date(date) : undefined;
     return await this.productService.bestSellers(

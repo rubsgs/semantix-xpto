@@ -72,4 +72,34 @@ export class CustomerService {
     customer.deletedAt = new Date();
     return await this.customerRepository.update(id, customer);
   }
+
+  async bestBuyers(
+    date?: Date,
+    month?: string,
+    year?: number,
+    direction: 'ASC' | 'DESC' = 'ASC',
+  ) {
+    let where = '';
+    if (year) {
+      where = `EXTRACT(YEAR FROM pu.purchase_date) = ${year}`;
+    }
+
+    if (month) {
+      where = `TO_DATE(purchase_date::text, 'YYYY-MM') = '${month}-01'`;
+    }
+
+    if (date) {
+      const dateString = date.toISOString().split('T')[0];
+      where = `TO_DATE(purchase_date::text, 'YYYY-MM-DD') = '${dateString}'`;
+    }
+    const queryBuilder = this.customerRepository
+      .createQueryBuilder('c')
+      .select('c.*')
+      .innerJoin('purchases', 'pu', 'c.id = pu.customer_id')
+      .addSelect('SUM(total_value) AS totalSpent')
+      .where(where)
+      .groupBy('c.id')
+      .orderBy('totalSpent', direction);
+    return await queryBuilder.getRawMany();
+  }
 }

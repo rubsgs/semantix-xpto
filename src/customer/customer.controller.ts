@@ -32,6 +32,17 @@ export class CustomerController {
     return this.customerService.findAll(sorting, direction, page, limit);
   }
 
+  @Get('best-buyers')
+  async getBestBuyers(
+    @Query('date') date?: string,
+    @Query('month') month?: string,
+    @Query('year') year?: number,
+    @Query('direction') direction?: 'ASC' | 'DESC',
+  ) {
+    const dateObj = date ? new Date(date) : undefined;
+    return this.customerService.bestBuyers(dateObj, month, year, direction);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     const customer = this.customerService.findOne(+id);

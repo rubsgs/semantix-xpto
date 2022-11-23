@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { PurchaseItem } from 'src/purchase/entities/purchase.entity';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('products')
 export class Product {
@@ -8,12 +15,21 @@ export class Product {
   @Column()
   name: string;
 
-  @Column()
+  @Column({
+    type: 'decimal',
+    transformer: { from: (data) => +data, to: (data) => +data },
+  })
   price: number;
 
-  @Column()
+  @Column({
+    type: 'decimal',
+    transformer: { from: (data) => +data, to: (data) => +data },
+  })
   stock: number;
 
   @Column({ name: 'deleted_at' })
   deletedAt: Date;
+
+  @OneToMany(() => PurchaseItem, (purchaseItem) => purchaseItem.product)
+  purchases: PurchaseItem[];
 }

@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { PurchaseService } from './purchase.service';
 import { CreatePurchaseDto } from './dto/create-purchase.dto';
 import { UpdatePurchaseDto } from './dto/update-purchase.dto';
@@ -8,27 +17,44 @@ export class PurchaseController {
   constructor(private readonly purchaseService: PurchaseService) {}
 
   @Post()
-  create(@Body() createPurchaseDto: CreatePurchaseDto) {
-    return this.purchaseService.create(createPurchaseDto);
+  async create(@Body() createPurchaseDto: CreatePurchaseDto) {
+    return await this.purchaseService.create(createPurchaseDto);
   }
 
   @Get()
-  findAll() {
-    return this.purchaseService.findAll();
+  async findAll(
+    @Query('order') sorting?: string,
+    @Query('direction') direction: 'ASC' | 'DESC' = 'ASC',
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('customerId') customerId?: number,
+    @Query('date') purchaseDate?: string,
+  ) {
+    return this.purchaseService.findAll(
+      sorting,
+      direction,
+      page,
+      limit,
+      customerId,
+      purchaseDate ? new Date(purchaseDate) : undefined,
+    );
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.purchaseService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePurchaseDto: UpdatePurchaseDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updatePurchaseDto: UpdatePurchaseDto,
+  ) {
     return this.purchaseService.update(+id, updatePurchaseDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.purchaseService.remove(+id);
   }
 }

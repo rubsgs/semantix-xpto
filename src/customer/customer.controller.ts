@@ -44,8 +44,8 @@ export class CustomerController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    const customer = this.customerService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const customer = await this.customerService.findOne(+id);
     if (!customer) throw new NotFoundException(`Customer ID ${id} not found`);
     return customer;
   }

@@ -150,7 +150,7 @@ describe('CustomerService', () => {
   });
 
   describe('CustomerService.remove', () => {
-    it('should throw an error when deleting an product that doesnt exists', async () => {
+    it('should throw an error when deleting an customer that doesnt exists', async () => {
       const id = faker.datatype.number();
 
       try {

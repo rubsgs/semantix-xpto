@@ -62,7 +62,7 @@ describe('ProductService', () => {
       expect(savedProduct.id).toBeTruthy();
     });
 
-    it('should log an error if an exception is thrown', async () => {
+    it('should throw an exception in case of error', async () => {
       const product = new CreateProductDto();
       product.name = faker.lorem.words(2);
       product.price = faker.datatype.float();
@@ -76,12 +76,12 @@ describe('ProductService', () => {
   });
 
   describe('ProductService.findAll', () => {
-    it('should return an empty Array of products', async () => {
+    it('should return an empty array of products', async () => {
       const products = await service.findAll();
       expect(products.length).toBe(0);
     });
 
-    it('should return an empty Array of products', async () => {
+    it('should return an array containing one product', async () => {
       const product = new Product();
       product.id = faker.datatype.number();
       product.name = faker.lorem.words(2);
@@ -96,7 +96,7 @@ describe('ProductService', () => {
       expect(products[0].id).toBe(product.id);
     });
 
-    it('should log an error if an exception is thrown', async () => {
+    it('should throw an error in case of error', async () => {
       jest
         .spyOn(queryBuilderMock, 'getMany')
         .mockRejectedValueOnce(new Error('Test Error'));
@@ -118,7 +118,7 @@ describe('ProductService', () => {
       expect(selectedProduct.id).toBe(product.id);
     });
 
-    it('should log an error if an exception is thrown', async () => {
+    it('should throw an exception in case of error', async () => {
       jest
         .spyOn(repositoryMock, 'findOneBy')
         .mockRejectedValueOnce(new Error('Test Error'));
@@ -139,7 +139,7 @@ describe('ProductService', () => {
       expect(repositoryMock.update).toBeCalled();
     });
 
-    it('should log an error if an exception is thrown', async () => {
+    it('should throw an exception in case of error', async () => {
       const product = new Product();
       product.id = faker.datatype.number();
       product.name = faker.lorem.words(2);
@@ -155,7 +155,7 @@ describe('ProductService', () => {
     });
   });
 
-  describe('ProductSerivce.delete', () => {
+  describe('ProductSerivce.remove', () => {
     it('should throw an error when deleting an product that doesnt exists', async () => {
       const id = faker.datatype.number();
 

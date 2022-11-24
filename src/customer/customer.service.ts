@@ -39,7 +39,10 @@ export class CustomerService {
         .limit(limit)
         .orderBy(orderBy, direction);
       return await queryBuilder.getMany();
-    } catch (e) {}
+    } catch (e) {
+      this.logger.error(`An error occurred on findAll: ${e.message}`);
+      throw e;
+    }
   }
 
   async findOne(id: number) {

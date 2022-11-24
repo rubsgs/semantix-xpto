@@ -13,8 +13,14 @@ describe('ProductController', () => {
     offset: jest.fn().mockImplementation(() => queryBuilderMock),
     limit: jest.fn().mockImplementation(() => queryBuilderMock),
     orderBy: jest.fn().mockImplementation(() => queryBuilderMock),
+    groupBy: jest.fn().mockImplementation(() => queryBuilderMock),
+    select: jest.fn().mockImplementation(() => queryBuilderMock),
+    addSelect: jest.fn().mockImplementation(() => queryBuilderMock),
+    innerJoin: jest.fn().mockImplementation(() => queryBuilderMock),
     getMany: jest.fn().mockReturnValue([]),
+    getRawMany: jest.fn().mockReturnValue([]),
   };
+
   const repositoryMock = {
     save: jest.fn().mockImplementation((prod: Product) => {
       return { ...prod, id: faker.datatype.number() };
@@ -63,16 +69,10 @@ describe('ProductController', () => {
       product.name = faker.lorem.words(2);
       product.price = faker.datatype.float();
       product.stock = faker.datatype.number();
-      jest.spyOn(console, 'error').mockImplementation(() => null);
       jest
         .spyOn(repositoryMock, 'save')
-        .mockRejectedValueOnce(() => new Error('Test Error'));
-
-      try {
-        await controller.create(product);
-      } catch (e) {
-        expect(console.error).toBeCalled();
-      }
+        .mockRejectedValueOnce(new Error('Test Error'));
+      await expect(controller.create(product)).rejects.toThrow('Test Error');
     });
   });
 
@@ -160,6 +160,18 @@ describe('ProductController', () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValueOnce(product);
       await controller.remove(id.toString());
       expect(repositoryMock.update).toBeCalled();
+    });
+  });
+
+  describe('ProductController.getBestSellers', () => {
+    it('should use a date as a filter and return an empty array', async () => {
+      const bestSellers = await controller.getBestSellers('2022-12-31');
+      expect(bestSellers).toStrictEqual([]);
+    });
+
+    it('should use no filter and return an empty array', async () => {
+      const bestSellers = await controller.getBestSellers();
+      expect(bestSellers).toStrictEqual([]);
     });
   });
 });

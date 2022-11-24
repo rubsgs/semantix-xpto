@@ -5,9 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { plainToClass } from 'class-transformer';
-import { Customer } from 'src/customer/entities/customer.entity';
-import { Product } from 'src/product/entities/product.entity';
+import { Customer } from '../customer/entities/customer.entity';
+import { Product } from '../product/entities/product.entity';
 import {
   Between,
   FindOptionsOrder,

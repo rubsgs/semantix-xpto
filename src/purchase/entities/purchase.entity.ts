@@ -1,14 +1,11 @@
-import { Customer } from 'src/customer/entities/customer.entity';
-import { Product } from 'src/product/entities/product.entity';
+import { Customer } from '../../customer/entities/customer.entity';
+import { Product } from '../../product/entities/product.entity';
 import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 

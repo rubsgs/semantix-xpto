@@ -1,11 +1,5 @@
-import { PurchaseItem } from 'src/purchase/entities/purchase.entity';
-import {
-  Column,
-  Entity,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { PurchaseItem } from '../../purchase/entities/purchase.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('products')
 export class Product {

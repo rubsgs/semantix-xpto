@@ -6,13 +6,20 @@ import { CreateProductDto } from './dto/create-product.dto';
 
 describe('ProductService', () => {
   let service: ProductService;
+
   const queryBuilderMock = {
     where: jest.fn().mockImplementation(() => queryBuilderMock),
     offset: jest.fn().mockImplementation(() => queryBuilderMock),
     limit: jest.fn().mockImplementation(() => queryBuilderMock),
     orderBy: jest.fn().mockImplementation(() => queryBuilderMock),
+    groupBy: jest.fn().mockImplementation(() => queryBuilderMock),
+    select: jest.fn().mockImplementation(() => queryBuilderMock),
+    addSelect: jest.fn().mockImplementation(() => queryBuilderMock),
+    innerJoin: jest.fn().mockImplementation(() => queryBuilderMock),
     getMany: jest.fn().mockReturnValue([]),
+    getRawMany: jest.fn().mockReturnValue([]),
   };
+
   const repositoryMock = {
     save: jest.fn().mockImplementation((prod: Product) => {
       return { ...prod, id: faker.datatype.number() };
@@ -60,16 +67,11 @@ describe('ProductService', () => {
       product.name = faker.lorem.words(2);
       product.price = faker.datatype.float();
       product.stock = faker.datatype.number();
-      jest.spyOn(console, 'error').mockImplementation(() => null);
       jest
         .spyOn(repositoryMock, 'save')
-        .mockRejectedValueOnce(() => new Error('Test Error'));
+        .mockRejectedValueOnce(new Error('Test Error'));
 
-      try {
-        await service.create(product);
-      } catch (e) {
-        expect(console.error).toBeCalled();
-      }
+      await expect(service.create(product)).rejects.toThrow('Test Error');
     });
   });
 
@@ -93,6 +95,14 @@ describe('ProductService', () => {
       expect(products.length).toBe(1);
       expect(products[0].id).toBe(product.id);
     });
+
+    it('should log an error if an exception is thrown', async () => {
+      jest
+        .spyOn(queryBuilderMock, 'getMany')
+        .mockRejectedValueOnce(new Error('Test Error'));
+
+      await expect(() => service.findAll()).rejects.toThrow('Test Error');
+    });
   });
 
   describe('ProductService.findOne', () => {
@@ -107,6 +117,14 @@ describe('ProductService', () => {
       const selectedProduct = await service.findOne(product.id);
       expect(selectedProduct.id).toBe(product.id);
     });
+
+    it('should log an error if an exception is thrown', async () => {
+      jest
+        .spyOn(repositoryMock, 'findOneBy')
+        .mockRejectedValueOnce(new Error('Test Error'));
+
+      await expect(() => service.findOne(1)).rejects.toThrow('Test Error');
+    });
   });
 
   describe('ProductSerivce.update', () => {
@@ -117,8 +135,23 @@ describe('ProductService', () => {
       product.price = faker.datatype.float();
       product.stock = faker.datatype.number();
 
-      await service.update(faker.datatype.number(), product);
+      await service.update(product.id, product);
       expect(repositoryMock.update).toBeCalled();
+    });
+
+    it('should log an error if an exception is thrown', async () => {
+      const product = new Product();
+      product.id = faker.datatype.number();
+      product.name = faker.lorem.words(2);
+      product.price = faker.datatype.float();
+      product.stock = faker.datatype.number();
+      jest
+        .spyOn(repositoryMock, 'update')
+        .mockRejectedValueOnce(new Error('Test Error'));
+
+      await expect(() => service.update(product.id, product)).rejects.toThrow(
+        'Test Error',
+      );
     });
   });
 
@@ -144,6 +177,58 @@ describe('ProductService', () => {
       jest.spyOn(repositoryMock, 'findOneBy').mockResolvedValueOnce(product);
       await service.remove(product.id);
       expect(repositoryMock.update).toBeCalled();
+    });
+  });
+
+  describe('ProductSerive.bestSellers', () => {
+    it('should use purchase year as filter and return an empty array', async () => {
+      let where: string;
+      jest
+        .spyOn(queryBuilderMock, 'where')
+        .mockImplementation((param: string) => {
+          where = param;
+          return queryBuilderMock;
+        });
+
+      const year = 2022;
+      const bestSellers = await service.bestSellers(undefined, undefined, year);
+      expect(where).toBe(`EXTRACT(YEAR FROM pu.purchase_date) = ${year}`);
+      expect(bestSellers).toStrictEqual([]);
+    });
+
+    it('should use purchase month as filter and return an empty array', async () => {
+      let where: string;
+      jest
+        .spyOn(queryBuilderMock, 'where')
+        .mockImplementation((param: string) => {
+          where = param;
+          return queryBuilderMock;
+        });
+
+      const month = '2022-01';
+      const bestSellers = await service.bestSellers(undefined, month);
+      expect(where).toBe(
+        `TO_DATE(purchase_date::text, 'YYYY-MM') = '${month}-01'`,
+      );
+      expect(bestSellers).toStrictEqual([]);
+    });
+
+    it('should use purchase date as filter and return an empty array', async () => {
+      let where: string;
+      jest
+        .spyOn(queryBuilderMock, 'where')
+        .mockImplementation((param: string) => {
+          where = param;
+          return queryBuilderMock;
+        });
+
+      const date = new Date();
+      const dateString = date.toISOString().split('T')[0];
+      const bestSellers = await service.bestSellers(date);
+      expect(where).toBe(
+        `TO_DATE(purchase_date::text, 'YYYY-MM-DD') = '${dateString}'`,
+      );
+      expect(bestSellers).toStrictEqual([]);
     });
   });
 });

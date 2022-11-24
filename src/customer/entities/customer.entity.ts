@@ -1,4 +1,4 @@
-import { Purchase } from 'src/purchase/entities/purchase.entity';
+import { Purchase } from '../../purchase/entities/purchase.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('customers')

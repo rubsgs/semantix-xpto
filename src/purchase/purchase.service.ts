@@ -85,11 +85,12 @@ export class PurchaseService {
     if (purchaseMonth) {
       const [year, month] = purchaseMonth.split('-');
       const startDate = new Date(+year, +month - 1, 1);
-      const endDate = new Date(+year, +month, 0);
+      const endDate = new Date(+year, +month, 0, 23, 59, 59);
       where['purchaseDate'] = Between(startDate, endDate);
     }
 
     if (purchaseDate) {
+      purchaseDate.setUTCHours(0, 0, 0);
       const date = new Date(purchaseDate);
       date.setUTCHours(23, 59, 59, 999);
       where['purchaseDate'] = Between(purchaseDate, date);
@@ -104,7 +105,7 @@ export class PurchaseService {
   }
 
   async findOne(id: number) {
-    return await this.purchaseRepository.findBy({ id });
+    return await this.purchaseRepository.findOneBy({ id });
   }
 
   async update(id: number, updatePurchaseDto: UpdatePurchaseDto) {
